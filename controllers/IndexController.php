@@ -19,12 +19,15 @@ class IndexController extends Controller
         $this->pageData['title'] = "Кабинет";
 
         $tasks = $this->model->getTasks();
+        $taskColumn = $this->model->getTaskLimitOne();
         $tasksCount = count($tasks);
         $this->pageData['action'] = $_SERVER['REQUEST_URI'];
         $totalPages = ceil($tasksCount / $this->taskPerPage);
         $pagination = $this->utils->drawPager($tasksCount, $this->taskPerPage);
+        $sorts = $this->utils->drawSorts($taskColumn);
         $this->makeProductPager($tasksCount, $totalPages);
         $this->pageData['pagination'] = $pagination;
+        $this->pageData['sorts'] = $sorts;
         $this->pageData['tasks'] = $tasks;
         $this->pageData['tasksCount'] = $tasksCount;
 
@@ -34,17 +37,27 @@ class IndexController extends Controller
 
     public function edit()
     {
-        $this->pageData['title'] = "Редактировать";
-        $this->pageData['action'] = $_SERVER['REQUEST_URI'];
-        $task = $this->model->getTaskOne($_GET['id']);
-        if ($_POST) {
-            $this->model->updateTaskValue($_POST);
-            header("Location: /");
+        if ($_SESSION['user']){
+            $this->pageData['title'] = "Редактировать";
+            $this->pageData['action'] = $_SERVER['REQUEST_URI'];
+            $task = $this->model->getTaskOne($_GET['id']);
+            if ($_POST) {
+                if ($this->model->updateTaskValue($_POST)){
+                    echo 'success';
+                    return true;
+                }else{
+                    echo 'error';
+                    return false;
+                }
+            }
+
+            $this->pageData['task'] = $task;
+
+
+            $this->view->render('/views/form.tpl.php', $this->pageData);
+        }else{
+            header('HTTP/1.0 403 Forbidden');
         }
-        $this->pageData['task'] = $task;
-
-
-        $this->view->render('/views/form.tpl.php', $this->pageData);
     }
 
     public function create()
@@ -52,12 +65,18 @@ class IndexController extends Controller
         $this->pageData['title'] = "Создать";
         $this->pageData['action'] = $_SERVER['REQUEST_URI'];
         if ($_POST) {
-            $this->model->setTaskValue($_POST);
-            header("Location: /");
+            if ($this->model->setTaskValue($_POST)){
+                echo 'success';
+                return true;
+            }else{
+                echo 'error';
+                return false;
+            }
+
         }
+            $this->view->render('/views/form.tpl.php', $this->pageData);
 
 
-        $this->view->render('/views/form.tpl.php', $this->pageData);
     }
 
     public function logout()

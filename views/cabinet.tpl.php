@@ -111,14 +111,13 @@
                                 <form method="get" action="/">
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-hover table-striped">
-
                                             <thead>
                                             <tr>
-                                                <th>Номер</th>
-                                                <th>Имя</th>
-                                                <th>email</th>
+                                                <th><a href="<?=$pageData['sorts']['sort-id']?>" style="cursor: pointer">Номер</a></th>
+                                                <th><a href="<?=$pageData['sorts']['sort-name']?>" style="cursor: pointer">Имя</a></th>
+                                                <th><a href="<?=$pageData['sorts']['sort-email']?>" style="cursor: pointer">email</a></th>
                                                 <th>Текст</th>
-                                                <th>Статус</th>
+                                                <th><a <a href="<?=$pageData['sorts']['sort-status']?>" style="cursor: pointer">Статус</a></th>
                                                 <th></th>
                                             </tr>
 
@@ -150,7 +149,11 @@
                                                 foreach ($pageData['tasksOnPage'] as $key => $value) {
                                                     echo "<tr>";
                                                     echo "<td>" . $value['id'] . "</td>";
-                                                    echo "<td>" . $value['name'] . "</td>";
+                                                    if ($value['edit_admin']==1){
+                                                        echo "<td>" . $value['name'] . " <i class='fa fa-info-circle' data-toggle='tooltip' data-placement='top' title='Запись редактирована администратором'></i></td>";
+                                                    }else{
+                                                        echo "<td>" . $value['name'] . "</td>";
+                                                    }
                                                     echo "<td>" . $value['email'] . "</td>";
                                                     echo "<td>" . $value['text'] . "</td>";
                                                     if ($value['status'] == 1) {
@@ -191,9 +194,6 @@
 <!-- jQuery -->
 <script src="/js/jquery.js"></script>
 
-<!-- Angular -->
-<script src="/js/admin/cabinet.js"></script>
-
 <!-- Bootstrap Core JavaScript -->
 <script src="/js/bootstrap.min.js"></script>
 
@@ -202,7 +202,11 @@
 
 <!-- Custom Theme JavaScript -->
 <script src="/js/admin/sb-admin-2.js"></script>
-
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
 </body>
 
 </html>

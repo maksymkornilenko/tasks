@@ -23,7 +23,16 @@ class IndexModel extends Model
         $sql = "SELECT *
                 FROM tasks where id=" . $id . "
                         ";
-        $result = array();
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $res;
+    }
+    public function getTaskLimitOne()
+    {
+        $sql = "SELECT * FROM tasks LIMIT 1";
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -39,12 +48,14 @@ class IndexModel extends Model
         }
         $sql = "UPDATE `tasks` SET `name` = 
 '" . $post["name"] . "',`email` = '" . $post["email"] . "
-',`text` = '" . $post["text"] . "' ,`status` = " . $post["status"] . "
+',`text` = '" . $post["text"] . "' ,`status` = " . $post["status"] . ",`edit_admin`=1
  WHERE `tasks`.`id` = " . $_GET["id"];
         $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-
-        return true;
+        if ($stmt->execute()){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     public function getLimitTasks($leftLimit, $rightLimit)
@@ -59,7 +70,7 @@ class IndexModel extends Model
                 } else {
                     $operator = " AND ";
                 }
-                if ($key != 'page' && $key != 'status' && $value != '') {
+                if ($key != 'page' && $key != 'data-sort' && $key != 'status' && $value != '') {
                     $sql .= $operator . $key . " like '%" . $value . "%'";
                     $i++;
                 } elseif ($key == 'status' && $value != '') {
@@ -68,6 +79,13 @@ class IndexModel extends Model
                 }
             }
 
+        }
+        if ($_GET['data-sort']){
+            if (substr($_GET['data-sort'],0, 1)=='-'){
+                $sql .= ' ORDER BY '.substr($_GET['data-sort'], 1).' DESC';
+            }else{
+                $sql .= ' ORDER BY '.$_GET['data-sort'].' ASC';
+            }
         }
         $sql .= " LIMIT :leftLimit, :rightLimit";
         $stmt = $this->db->prepare($sql);
@@ -86,8 +104,11 @@ class IndexModel extends Model
         $sql = "INSERT INTO `tasks` (`id`,`name`,`email`, `text`) VALUES 
 (null ,'" . $post["name"] . "','" . $post["email"] . "', '" . $post["text"] . "')";
         $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        return true;
+        if ($stmt->execute()){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }
